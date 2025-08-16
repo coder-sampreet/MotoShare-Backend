@@ -8,17 +8,19 @@ import {
 } from "../validations/auth.validation.js";
 import multerErrorHandler from "../middlewares/multerErrorHandler.middleware.js";
 import autoCleanupOnError from "../middlewares/cleanup.middleware.js";
-
+import { authRateLimiter } from "../middlewares/rateLimiter.middleware.js";
 const router = express.Router();
 
 router.post(
     "/register",
     multerErrorHandler(uploadAvatar),
     validate(registerUserSchema),
+    authRateLimiter,
     AuthController.register,
     autoCleanupOnError
 );
 
-router.post("/login", validate(loginUserSchema), AuthController.login);
+router.post("/login", validate(loginUserSchema),authRateLimiter, AuthController.login);
 
+router.post("/logout", AuthController.logout);
 export default router;

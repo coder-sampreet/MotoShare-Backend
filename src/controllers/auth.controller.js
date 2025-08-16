@@ -16,7 +16,7 @@ const refreshTokenCookieOptions = {
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: "/api/v1/auth/refresh-token",
+    path: "/",
 };
 
 const register = asyncHandler(async (req, res) => {
@@ -81,4 +81,15 @@ const login = asyncHandler(async (req, res) => {
         "Login Successful"
     );
 });
-export { register, login };
+
+const logout = asyncHandler(async (req, res) => {
+    const refreshToken = req.cookies?.refreshToken;
+
+    await AuthServices.logoutUser({ refreshToken });
+
+    res.clearCookie("accessToken", accessTokenCookieOptions);
+    res.clearCookie("refreshToken", refreshTokenCookieOptions);
+
+    return APIResponse.ok(res, null, "Logged out successfully");
+});
+export { register, login, logout };

@@ -25,7 +25,7 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());
-app.use(cors({ origin: env.CORS_ORIGIN })); // improve this later
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true })); // improve this later
 app.use(helmet({ crossOriginEmbedderPolicy: false }));
 
 // Rate limiting (apply before main routes)

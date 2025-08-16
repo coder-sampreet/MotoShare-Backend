@@ -133,4 +133,47 @@ const loginUser = async ({ emailOrUsername, password, ip, userAgent }) => {
     };
 };
 
-export { registerUser, loginUser };
+const logoutUser = async ({ refreshToken }) => {
+    if (!refreshToken) {
+        return {
+            success: false,
+            message: "Refresh token missing",
+        };
+    }
+    let decoded;
+    try {
+        decoded = verifyRefreshToken(refreshToken);
+    } catch (err) {
+        return {
+            success: false,
+            message: "Invalid or expired refresh token",
+        };
+    }
+
+    const userId = decoded.id;
+    const tokenDoc = await Token.findOneAndUpdate(
+        {
+            user: userId,
+            refreshToken,
+            isValid: true,
+        },
+        {
+            isValid: false,
+        },
+        { new: true }
+    );
+
+    if (!tokenDoc) {
+        return {
+            success: false,
+            message: "Session not found or already logged out",
+        };
+    }
+
+    return {
+        success: true,
+        message: "Logged out successfully",
+    };
+};
+
+export { registerUser, loginUser, logoutUser };
