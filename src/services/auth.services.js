@@ -87,4 +87,50 @@ const registerUser = async ({
     };
 };
 
-export { registerUser };
+const loginUser = async ({ emailOrUsername, password, ip, userAgent }) => {
+    const user = await User.findOne({
+        $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
+    }).select("+password");
+    if (!user) APIError.throwUnauthorized("User not found");
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) APIError.throwUnauthorized("Incorrect Password");
+
+    await Token.updateMany(
+        {
+            user: user._id,
+            ip: ip,
+            userAgent: userAgent,
+            isValid: true,
+        },
+        {
+            $set: { isValid: false },
+        }
+    );
+
+    const payload = {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+    };
+
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
+
+    await Token.create({
+        user: user._id,
+        refreshToken,
+        ip,
+        userAgent,
+        isValid: true,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    return {
+        user: user.toJSON(),
+        accessToken,
+        refreshToken,
+    };
+};
+
+export { registerUser, loginUser };

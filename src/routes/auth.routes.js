@@ -2,7 +2,10 @@ import express from "express";
 import * as AuthController from "../controllers/auth.controller.js";
 import { uploadAvatar } from "../middlewares/multer.middleware.js";
 import validate from "../middlewares/requestValidator.middleware.js";
-import { registerUserSchema } from "../validations/auth.validation.js";
+import {
+    loginUserSchema,
+    registerUserSchema,
+} from "../validations/auth.validation.js";
 import multerErrorHandler from "../middlewares/multerErrorHandler.middleware.js";
 import autoCleanupOnError from "../middlewares/cleanup.middleware.js";
 
@@ -15,5 +18,7 @@ router.post(
     AuthController.register,
     autoCleanupOnError
 );
+
+router.post("/login", validate(loginUserSchema), AuthController.login);
 
 export default router;

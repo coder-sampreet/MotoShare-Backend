@@ -54,4 +54,31 @@ const register = asyncHandler(async (req, res) => {
     );
 });
 
-export { register };
+const login = asyncHandler(async (req, res) => {
+    const { emailOrUsername, password } = req.body;
+    const ip = req.ip;
+    const userAgent = req.get("User-Agent");
+
+    const { user, accessToken, refreshToken } = await AuthServices.loginUser({
+        emailOrUsername,
+        password,
+        ip,
+        userAgent,
+    });
+
+    logger.info(`User Login: ${user.email} from IP ${ip}`);
+
+    res.cookie("accessToken", accessToken, accessTokenCookieOptions);
+    res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
+
+    return APIResponse.ok(
+        res,
+        {
+            user: user,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+        },
+        "Login Successful"
+    );
+});
+export { register, login };
