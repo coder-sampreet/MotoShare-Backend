@@ -1,6 +1,7 @@
 import * as AuthServices from "../services/auth.services.js";
 import asyncHandler from "../utils/asyncHandler.util.js";
 import APIResponse from "../core/APIResponse.js";
+import logger from "../config/logger.config.js";
 
 const accessTokenCookieOptions = {
     httpOnly: true,
@@ -37,7 +38,7 @@ const register = asyncHandler(async (req, res) => {
         }
     );
 
-    console.info(`New user registered: ${user.email} from IP ${ip}`);
+    logger.info(`New user registered: ${user.email} from IP ${ip}`);
 
     res.cookie("accessToken", accessToken, accessTokenCookieOptions);
     res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);

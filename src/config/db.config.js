@@ -1,7 +1,7 @@
 // src/config/db.config.js
 import mongoose from "mongoose";
 import env from "./env.config.js";
-
+import logger from "./logger.config.js";
 const connectDB = async () => {
     try {
         const connectionInstance = await mongoose.connect(
@@ -9,7 +9,7 @@ const connectDB = async () => {
         );
         return connectionInstance;
     } catch (err) {
-        console.error("MongoDB connection failed!",err);
+        logger.error("MongoDB connection failed!",err);
         throw err;
     }
 };

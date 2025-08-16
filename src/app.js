@@ -9,11 +9,19 @@ import errorHandler from "./middlewares/errorHandler.middleware.js";
 import APIError from "./core/APIError.js";
 import globalRateLimiter from "./middlewares/rateLimiter.middleware.js";
 import env from "./config/env.config.js";
-
+import logger from "./config/logger.config.js";
 const app = express();
 
 // Middlewares
-app.use(morgan("dev"));
+app.use(
+    morgan("combined", {
+        stream: {
+            write: (message) => {
+                logger.http(message.trim());
+            },
+        },
+    })
+);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cookieParser());

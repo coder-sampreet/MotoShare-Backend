@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs/promises";
 import env from "../config/env.config.js";
+import logger from "../config/logger.config.js";
 
 const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
     env;
@@ -24,7 +25,7 @@ const uploadImage = async (filePath, options) => {
         try {
             await fs.unlink(filePath);
         } catch (err) {
-            console.debug("Local file cleanup failed:", err);
+            logger.debug("Local file cleanup failed:", err);
         }
     }
 };

@@ -2,6 +2,7 @@
 import APIError from "../core/APIError.js";
 import ERROR_CODES from "../constants/errorCodes.const.js";
 import env from "../config/env.config.js";
+import logger from "../config/logger.config.js";
 
 /**
  * Global error handler middleware for Express.
@@ -14,7 +15,7 @@ const errorHandler = (err, req, res, next) => {
     }
 
     // Handle other unexpected errors
-    console.debug("Unhandled Error:", err);
+    logger.debug("Unhandled Error:", err);
 
     // Try to extract a statusCode if available
     const statusCode = Number.isInteger(err.statusCode) ? err.statusCode : 500;

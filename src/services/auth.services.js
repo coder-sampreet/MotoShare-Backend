@@ -1,5 +1,6 @@
 import { User } from "../models/user.model.js";
 import { Token } from "../models/token.model.js";
+import logger from "../config/logger.config.js";
 
 import {
     generateAccessToken,
@@ -43,10 +44,7 @@ const registerUser = async ({
             avatar = url;
             avatarPublicId = publicId;
         } catch (err) {
-            console.error(
-                "Failed to upload avatar on cloudinary! Error: ",
-                err
-            );
+            logger.error("Failed to upload avatar on cloudinary! Error: ", err);
             avatar = null;
             avatarPublicId = null;
         }
