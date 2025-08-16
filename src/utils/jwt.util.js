@@ -19,7 +19,7 @@ const generateAccessToken = ({ id, username, email }) => {
     });
 };
 
-const generateRefrehToken = ({ id, username, email }) => {
+const generateRefreshToken = ({ id, username, email }) => {
     const payload = {
         id: id,
         username: username,
@@ -48,7 +48,7 @@ const verifyRefreshToken = (refreshToken) => {
 
 export {
     generateAccessToken,
-    generateRefrehToken,
+    generateRefreshToken,
     verifyAccessToken,
     verifyRefreshToken,
 };
