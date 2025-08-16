@@ -9,7 +9,7 @@ const connectDB = async () => {
         );
         return connectionInstance;
     } catch (err) {
-        logger.error("MongoDB connection failed!",err);
+        logger.error(`MongoDB connection failed! Error:${err.message}`);
         throw err;
     }
 };

@@ -14,7 +14,7 @@ const app = express();
 
 // Middlewares
 app.use(
-    morgan("combined", {
+    morgan("dev", {
         stream: {
             write: (message) => {
                 logger.http(message.trim());
