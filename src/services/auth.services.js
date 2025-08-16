@@ -4,7 +4,7 @@ import logger from "../config/logger.config.js";
 
 import {
     generateAccessToken,
-    generateRefrehToken,
+    generateRefreshToken,
     verifyRefreshToken,
 } from "../utils/jwt.util.js";
 
@@ -69,7 +69,7 @@ const registerUser = async ({
     };
 
     const accessToken = generateAccessToken(payload);
-    const refreshToken = generateRefrehToken(payload);
+    const refreshToken = generateRefreshToken(payload);
 
     await Token.create({
         user: user._id,
