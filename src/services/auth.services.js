@@ -202,14 +202,20 @@ const refreshAccessToken = async ({ refreshToken, ip, userAgent }) => {
     if (!decoded?.id) {
         APIError.throwUnauthorized("Malformed refresh token");
     }
-    console.log(decoded);
-    const existingToken = await Token.findOne({
-        user: decoded.id,
-        refreshToken,
-        isValid: true,
-        expiresAt: { $gt: new Date() },
-    });
-    console.log(existingToken);
+
+    const existingToken = await Token.findOneAndUpdate(
+        {
+            user: decoded.id,
+            refreshToken,
+            isValid: true,
+            expiresAt: { $gt: new Date() },
+        },
+        {
+            $set: { isValid: false },
+        },
+        { new: true }
+    );
+
     if (!existingToken)
         APIError.throwUnauthorized(
             "Session not found or refresh token revoked"
@@ -217,18 +223,6 @@ const refreshAccessToken = async ({ refreshToken, ip, userAgent }) => {
 
     const user = await User.findById(decoded.id);
     if (!user) APIError.throwNotFound("User not found");
-
-    existingToken.isValid = false;
-    await existingToken.save();
-    await Token.updateMany(
-        {
-            user: user._id,
-            ip,
-            userAgent,
-            isValid: true,
-        },
-        { $set: { isValid: false } }
-    );
 
     const payload = {
         id: user._id,
