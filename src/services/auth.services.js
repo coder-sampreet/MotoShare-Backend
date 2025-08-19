@@ -145,7 +145,7 @@ const logoutUser = async ({ refreshToken }) => {
     } catch (err) {
         logger.warn("Invalid or expired refresh token", {
             error: err.message,
-            token: refreshAccessToken,
+            token: refreshToken,
         });
         APIError.throwUnauthorized("Invalid or expired refresh token");
     }
@@ -185,4 +185,75 @@ const logoutUser = async ({ refreshToken }) => {
     };
 };
 
-export { registerUser, loginUser, logoutUser };
+const refreshAccessToken = async ({ refreshToken, ip, userAgent }) => {
+    if (!refreshToken) APIError.throwBadRequest("Refresh token is required");
+
+    let decoded;
+
+    try {
+        decoded = verifyRefreshToken(refreshToken);
+    } catch (err) {
+        logger.warn("Invalid or expired refresh token during refresh", {
+            error: err.message,
+        });
+        APIError.throwUnauthorized("Invalid or expired refresh token");
+    }
+
+    if (!decoded?.id) {
+        APIError.throwUnauthorized("Malformed refresh token");
+    }
+    console.log(decoded);
+    const existingToken = await Token.findOne({
+        user: decoded.id,
+        refreshToken,
+        isValid: true,
+        expiresAt: { $gt: new Date() },
+    });
+    console.log(existingToken);
+    if (!existingToken)
+        APIError.throwUnauthorized(
+            "Session not found or refresh token revoked"
+        );
+
+    const user = await User.findById(decoded.id);
+    if (!user) APIError.throwNotFound("User not found");
+
+    existingToken.isValid = false;
+    await existingToken.save();
+    await Token.updateMany(
+        {
+            user: user._id,
+            ip,
+            userAgent,
+            isValid: true,
+        },
+        { $set: { isValid: false } }
+    );
+
+    const payload = {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+    };
+
+    const newAccessToken = generateAccessToken(payload);
+    const newRefreshToken = generateRefreshToken(payload);
+
+    await Token.create({
+        user: user._id,
+        refreshToken: newRefreshToken,
+        ip,
+        userAgent,
+        isValid: true,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    logger.info("Access token refreshed successfully", { userId: user._id });
+
+    return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+    };
+};
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken };

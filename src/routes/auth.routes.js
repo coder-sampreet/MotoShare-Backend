@@ -20,7 +20,15 @@ router.post(
     autoCleanupOnError
 );
 
-router.post("/login", validate(loginUserSchema),authRateLimiter, AuthController.login);
+router.post(
+    "/login",
+    validate(loginUserSchema),
+    authRateLimiter,
+    AuthController.login
+);
 
 router.post("/logout", AuthController.logout);
+
+router.post("/refresh-token", AuthController.refreshAccessTokenController);
+
 export default router;

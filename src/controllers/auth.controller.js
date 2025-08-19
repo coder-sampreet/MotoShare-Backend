@@ -23,7 +23,7 @@ const register = asyncHandler(async (req, res) => {
     const { fullName, username, email, phone, password } = req.body;
     const avatarPath = req.file?.path ?? null;
     const ip = req.ip;
-    const userAgent = req.get("User-Agent");
+    const userAgent = req.get("user-agent");
 
     const { user, accessToken, refreshToken } = await AuthServices.registerUser(
         {
@@ -55,7 +55,7 @@ const register = asyncHandler(async (req, res) => {
 const login = asyncHandler(async (req, res) => {
     const { emailOrUsername, password } = req.body;
     const ip = req.ip;
-    const userAgent = req.get("User-Agent");
+    const userAgent = req.get("user-agent");
 
     const { user, accessToken, refreshToken } = await AuthServices.loginUser({
         emailOrUsername,
@@ -63,7 +63,6 @@ const login = asyncHandler(async (req, res) => {
         ip,
         userAgent,
     });
-
 
     res.cookie("accessToken", accessToken, accessTokenCookieOptions);
     res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
@@ -89,4 +88,31 @@ const logout = asyncHandler(async (req, res) => {
 
     return APIResponse.ok(res, null, "Logged out successfully");
 });
-export { register, login, logout };
+
+const refreshAccessTokenController = asyncHandler(async (req, res) => {
+    const oldRefreshToken = req.cookies?.refreshToken;
+    const ip = req.ip;
+    const userAgent = req.get("user-agent");
+
+    const { accessToken, refreshToken } = await AuthServices.refreshAccessToken(
+        {
+            refreshToken: oldRefreshToken,
+            ip,
+            userAgent,
+        }
+    );
+    
+    res.cookie("accessToken", accessToken, accessTokenCookieOptions);
+    res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
+
+    return APIResponse.ok(
+        res,
+        {
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+        },
+        "Access token refreshed successfully"
+    );
+});
+
+export { register, login, logout, refreshAccessTokenController };
