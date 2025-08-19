@@ -12,6 +12,8 @@ import { uploadAvatar } from "../utils/cloudinary.util.js";
 
 import APIError from "../core/APIError.js";
 
+const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000;
+
 const registerUser = async ({
     fullName,
     username,
@@ -77,7 +79,7 @@ const registerUser = async ({
         ip,
         userAgent,
         isValid: true,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
     });
 
     logger.info(`New user registered: ${user.email} from IP ${ip}`);
@@ -125,7 +127,7 @@ const loginUser = async ({ emailOrUsername, password, ip, userAgent }) => {
         ip,
         userAgent,
         isValid: true,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
     });
 
     logger.info(`User Login: ${user.email} from IP ${ip}`);
@@ -239,7 +241,7 @@ const refreshAccessToken = async ({ refreshToken, ip, userAgent }) => {
         ip,
         userAgent,
         isValid: true,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL),
     });
 
     logger.info("Access token refreshed successfully", { userId: user._id });
