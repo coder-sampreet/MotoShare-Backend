@@ -80,6 +80,8 @@ const registerUser = async ({
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
+    logger.info(`New user registered: ${user.email} from IP ${ip}`);
+
     return {
         user: user.toJSON(),
         accessToken,
@@ -126,6 +128,8 @@ const loginUser = async ({ emailOrUsername, password, ip, userAgent }) => {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
+    logger.info(`User Login: ${user.email} from IP ${ip}`);
+
     return {
         user: user.toJSON(),
         accessToken,
@@ -134,20 +138,20 @@ const loginUser = async ({ emailOrUsername, password, ip, userAgent }) => {
 };
 
 const logoutUser = async ({ refreshToken }) => {
-    if (!refreshToken) {
-        return {
-            success: false,
-            message: "Refresh token missing",
-        };
-    }
+    if (!refreshToken) APIError.throwBadRequest("Refresh token is required");
     let decoded;
     try {
         decoded = verifyRefreshToken(refreshToken);
     } catch (err) {
-        return {
-            success: false,
-            message: "Invalid or expired refresh token",
-        };
+        logger.warn("Invalid or expired refresh token", {
+            error: err.message,
+            token: refreshAccessToken,
+        });
+        APIError.throwUnauthorized("Invalid or expired refresh token");
+    }
+    if (!decoded?.id) {
+        logger.error("Decoded refresh token missing user ID", { decoded });
+        APIError.throwUnauthorized("Malformed refresh token");
     }
 
     const userId = decoded.id;
@@ -164,11 +168,16 @@ const logoutUser = async ({ refreshToken }) => {
     );
 
     if (!tokenDoc) {
-        return {
-            success: false,
-            message: "Session not found or already logged out",
-        };
+        logger.info(
+            "Logout attempt for non-existent or already invalidated session",
+            {
+                userId: userId,
+            }
+        );
+        APIError.throwNotFound("Session not found or already logged out");
     }
+
+    logger.info("User logged out successfully", { userId: userId });
 
     return {
         success: true,

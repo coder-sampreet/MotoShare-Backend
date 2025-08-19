@@ -38,8 +38,6 @@ const register = asyncHandler(async (req, res) => {
         }
     );
 
-    logger.info(`New user registered: ${user.email} from IP ${ip}`);
-
     res.cookie("accessToken", accessToken, accessTokenCookieOptions);
     res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
 
@@ -66,7 +64,6 @@ const login = asyncHandler(async (req, res) => {
         userAgent,
     });
 
-    logger.info(`User Login: ${user.email} from IP ${ip}`);
 
     res.cookie("accessToken", accessToken, accessTokenCookieOptions);
     res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
